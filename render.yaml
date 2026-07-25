@@ -1,0 +1,37 @@
+# ---------------------------------------------------------------------------
+# render.yaml — تعریف سرویس نورتیکا برای دیپلوی خودکار روی Render (Blueprint)
+# با این فایل، فقط کافیه ریپازیتوری رو در Render به‌عنوان "Blueprint" وصل
+# کنی؛ نیازی به تنظیم دستی Build/Start Command نیست.
+# ---------------------------------------------------------------------------
+services:
+  - type: web
+    name: noortika
+    env: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      # آدرس نهایی دامنه‌ی سایت بعد از اولین دیپلوی این مقدار را با URL
+      # واقعی‌ای که Render به تو می‌دهد (یا دامنه‌ی اختصاصی‌ات) عوض کن؛
+      # pages.py و redirect_manager.py هر دو از همین متغیر برای
+      # canonical/OG/sitemap و whitelist دامنه استفاده می‌کنند.
+      - key: SITE_URL
+        value: https://noortika.onrender.com
+      # اختیاری: برای فعال‌سازی هوش مصنوعی واقعی Gemini. اگر خالی بماند،
+      # پروژه با موتور fallback داخلی کار می‌کند.
+      - key: GEMINI_API_KEY
+        sync: false
+      # اختیاری: فقط اگر بخواهی برخی Redirectها به یک دامنه‌ی خارجی مجاز
+      # اشاره کنند (پیش‌فرض خالی = هیچ دامنه‌ی خارجی مجاز نیست).
+      - key: ALLOWED_REDIRECT_HOSTS
+        value: ""
+    # نکته: پلن free در Render دیسک پایدار (Persistent Disk) پشتیبانی نمی‌کند،
+    # پس دیتابیس SQLite با هر ری‌استارت/دیپلوی پاک می‌شود (طبق README پروژه،
+    # این برای دموی نمادین کافی است). اگر بعداً به پلن پولی ارتقا دادی و
+    # خواستی داده‌ها پایدار بمانند، این بخش را اضافه کن:
+    #
+    # disk:
+    #   name: noortika-data
+    #   mountPath: /app/data
+    #   sizeGB: 1
